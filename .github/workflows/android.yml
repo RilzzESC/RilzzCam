@@ -27,13 +27,28 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Locate Android SDK Manager
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager 2>/dev/null | head -n 1)
+
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager tidak ditemukan!"
+            find "$ANDROID_HOME" -maxdepth 4 -type f -name sdkmanager 2>/dev/null
+            exit 1
+          fi
+
+          echo "SDKMANAGER=$SDKMANAGER"
+          echo "SDKMANAGER=$SDKMANAGER" >> "$GITHUB_ENV"
+          echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
+
       - name: Accept Android SDK licenses
         run: |
-          yes | sdkmanager --licenses
+          yes | "$SDKMANAGER" --licenses
 
       - name: Install Android SDK packages
         run: |
-          sdkmanager --install \
+          "$SDKMANAGER" --install \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"

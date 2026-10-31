@@ -4,10 +4,8 @@ name: Build RilzzCam Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    paths:
-      - "android/**"
-      - ".github/workflows/android.yml"
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -29,21 +27,24 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install SDK
+      - name: Install Android SDK
         run: |
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          yes | sdkmanager --licenses
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
 
-      - name: Build APK
+      - name: Build RilzzCam APK
         working-directory: android
-        run: gradle assembleDebug
+        run: gradle --no-daemon assembleDebug
 
-      - name: Upload APK
+      - name: Upload RilzzCam APK
         uses: actions/upload-artifact@v4
         with:
           name: RilzzCam-Android-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
